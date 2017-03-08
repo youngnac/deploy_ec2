@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import json
 import os
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.environ.get('MODE') == 'DEBUG'
+# 그냥 런서버: DEBUG = False
+# MODE='DEBUG' ./manage.py runserver : DEBUG = True
+print(DEBUG)
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -19,12 +25,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 CONFIG_FILE_COMMON = os.path.join(os.path.join(os.path.dirname(BASE_DIR), '.conf-secret'), 'settings_common.json')
 config_common = json.loads(open(CONFIG_FILE_COMMON).read())
-
 CONFIG_FILE = os.path.join(os.path.join(os.path.dirname(BASE_DIR), '.conf-secret'), 'settings_local.json')
-config = json.loads(open(CONFIG_FILE).read())
-#
-# CONFIG_DEPLOY = os.path.join(os.path.join(os.path.dirname(BASE_DIR), '.conf-secret'), 'settings_deploy.json')
-# config_deploy = json.loads(open(CONFIG_DEPLOY).read())
+CONFIG_DEPLOY = os.path.join(os.path.join(os.path.dirname(BASE_DIR), '.conf-secret'), 'settings_deploy.json')
+
+if DEBUG:
+    config = json.loads(open(CONFIG_FILE).read())
+else:
+    config = json.loads(open(CONFIG_DEPLOY).read())
+    print(config)
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config_common['django']['secret_key']
 
@@ -33,9 +42,6 @@ for key, key_dict in config_common.items():
         config[key] = {}
     for inner_key, inner_key_dict in key_dict.items():
         config[key][inner_key] = inner_key_dict
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = config['django']['allowed_hosts']
 
@@ -90,6 +96,7 @@ DATABASES = {
         'USER': config['db']['user'],
         'PASSWORD': config['db']['password'],
         'HOST': config['db']['host'],
+        'PORT': config['db']['port'],
         'PORT': config['db']['port'],
     }
 }
