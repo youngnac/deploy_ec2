@@ -22,7 +22,9 @@ config_common = json.loads(open(CONFIG_FILE_COMMON).read())
 
 CONFIG_FILE = os.path.join(os.path.join(os.path.dirname(BASE_DIR), '.conf-secret'), 'settings_local.json')
 config = json.loads(open(CONFIG_FILE).read())
-
+#
+# CONFIG_DEPLOY = os.path.join(os.path.join(os.path.dirname(BASE_DIR), '.conf-secret'), 'settings_deploy.json')
+# config_deploy = json.loads(open(CONFIG_DEPLOY).read())
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config_common['django']['secret_key']
 
@@ -31,7 +33,6 @@ for key, key_dict in config_common.items():
         config[key] = {}
     for inner_key, inner_key_dict in key_dict.items():
         config[key][inner_key] = inner_key_dict
-print(config)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -84,8 +85,12 @@ WSGI_APPLICATION = 'deploy_ec2.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': config['db']['engine'],
+        'NAME': config['db']['name'],
+        'USER': config['db']['user'],
+        'PASSWORD': config['db']['password'],
+        'HOST': config['db']['host'],
+        'PORT': config['db']['port'],
     }
 }
 
