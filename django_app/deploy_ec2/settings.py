@@ -16,10 +16,10 @@ import os
 DEBUG = os.environ.get('MODE') == 'DEBUG'
 # 그냥 런서버: DEBUG = False
 # MODE='DEBUG' ./manage.py runserver : DEBUG = True
-print(DEBUG)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT_DIR= os.path.dirname(BASE_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
@@ -32,7 +32,6 @@ if DEBUG:
     config = json.loads(open(CONFIG_FILE).read())
 else:
     config = json.loads(open(CONFIG_DEPLOY).read())
-    print(config)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config_common['django']['secret_key']
@@ -45,8 +44,20 @@ for key, key_dict in config_common.items():
 
 ALLOWED_HOSTS = config['django']['allowed_hosts']
 
+STATIC_URL = '/static/'
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(ROOT_DIR, 'media')
+
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+STATICFILES_DIRS = (
+    STATIC_DIR,
+)
+STATIC_ROOT = os.path.join(ROOT_DIR, 'static_root')
 # Application definition
 
+AUTH_USER_MODEL= 'member.MyUser'
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -54,6 +65,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'member',
 ]
 
 MIDDLEWARE = [
@@ -71,7 +84,9 @@ ROOT_URLCONF = 'deploy_ec2.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            TEMPLATES_DIR,
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,6 +94,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -96,7 +112,6 @@ DATABASES = {
         'USER': config['db']['user'],
         'PASSWORD': config['db']['password'],
         'HOST': config['db']['host'],
-        'PORT': config['db']['port'],
         'PORT': config['db']['port'],
     }
 }
@@ -134,5 +149,3 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
-
-STATIC_URL = '/static/'
