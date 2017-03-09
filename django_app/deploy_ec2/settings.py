@@ -14,8 +14,8 @@ import os
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('MODE') == 'DEBUG'
-
 STORAGE_S3 = os.environ.get('STORAGE') == 'S3' or DEBUG is False
+DB_RDS = os.environ.get('DB') == 'RDS'
 print('DEBUG: {}'.format(DEBUG))
 print('STORAGE_S3: {}'.format(STORAGE_S3))
 # DEBUG = True
@@ -141,15 +141,18 @@ WSGI_APPLICATION = 'deploy_ec2.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
+if DEBUG and DB_RDS:
+    config_db = config['db_rds']
+else:
+    config_db = config['db']
 DATABASES = {
     'default': {
-        'ENGINE': config['db']['engine'],
-        'NAME': config['db']['name'],
-        'USER': config['db']['user'],
-        'PASSWORD': config['db']['password'],
-        'HOST': config['db']['host'],
-        'PORT': config['db']['port'],
+        'ENGINE': config_db['engine'],
+        'NAME': config_db['name'],
+        'USER': config_db['user'],
+        'PASSWORD': config_db['password'],
+        'HOST': config_db['host'],
+        'PORT': config_db['port'],
     }
 }
 
